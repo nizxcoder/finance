@@ -1,13 +1,11 @@
-const mongoose = require('mongoose');
-
+const mongoose = require("mongoose");
+const uri = "mongodb://127.0.0.1:27017/finance";
 const dbConnect = async () => {
   try {
-    await mongoose.connect('mongodb://localhost:27017/test', {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    await mongoose.connect(uri);
+    console.log("Connected to the database");
   } catch (error) {
-    console.error('Error connecting to the database');
+    console.error("Error connecting to the database");
     console.error(error);
   }
 };
