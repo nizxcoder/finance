@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const user = new mongoose.Schema({
   username: {
@@ -32,6 +32,16 @@ const user = new mongoose.Schema({
       message: (props) => `${props.value} is not a valid email address!`,
     },
   },
+  otp: {
+    type: String,
+    required: false,
+    default: "0000", // Set a default value
+  },
+  email_verified: {
+    type: Boolean,
+    required: false,
+    default: false, // Set a default value
+  },
   password: {
     type: String,
     required: true,
@@ -46,7 +56,7 @@ const user = new mongoose.Schema({
   profilePic: {
     type: String,
     required: false,
-    default: 'default.jpg', // Set a default value
+    default: "default.jpg", // Set a default value
   },
   dob: {
     type: Date,
@@ -55,8 +65,8 @@ const user = new mongoose.Schema({
   gender: {
     type: String,
     required: true,
-    default: 'Unknown', // Set a default value
-    enum: ['Male', 'Female', 'Other', 'Unknown'], // Add enum validation
+    default: "Unknown", // Set a default value
+    enum: ["Male", "Female", "Other", "Unknown"], // Add enum validation
   },
   phone: {
     type: String,
@@ -97,6 +107,6 @@ const user = new mongoose.Schema({
 //   return this.firstName + ' ' + this.lastName;
 // });
 
-const User = mongoose.model('User', user);
+const User = mongoose.model("User", user);
 
 module.exports = User;
