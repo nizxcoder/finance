@@ -73,7 +73,7 @@ const sendOTP = async (otp, email) => {
     await transporter.sendMail(mailOptions);
   } catch (error) {
     console.error("Error sending OTP:", error);
-    throw new Error("Error sending OTP");
+    throw Error(error);
   }
 };
 
@@ -143,52 +143,7 @@ router.post("/resend-otp", async (req, res) => {
   }
 });
 
-router.post("/forgot-password", async (req, res) => {
-  const { email } = req.body;
-  try {
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
-    const OTP = generateOTP();
-    await sendOTP(OTP, email);
-    user.otp = OTP;
-    await user.save();
-    res.status(200).json({ message: "OTP sent successfully" });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// router.post("/forgot-email", async (req, res) => {
-//   const { email } = req.body;
-//   try {
-//     const user = await User.findOne({ email });
-//     if (!user) {
-//       return res.status(404).json({ error: "User not found" });
-//     }
-//     const transporter = nodemailer.createTransport({
-//       service: "gmail",
-//       auth: {
-//         user: process.env.EMAIL,
-//         pass: process.env.PASSWORD,
-//       },
-//     });
-
-//     let mailOptions = {
-//       from: process.env.EMAIL,
-//       to: email,
-//       subject: "Forgot Email",
-//       text: `Your email is ${email}`,
-//     };
-//     await transporter.sendMail(mailOptions);
-//     res.status(200).json({ message: "Email sent successfully" });
-//   } catch (error) {
-//     res.status(500).json({ error: error.message });
-//   }
-// });
-
-router.get("/login", async (req, res) => {
+router.post("/login", async (req, res) => {
   const { email, password } = req.body;
   try {
     const user = await User.findOne({ email });
@@ -206,8 +161,47 @@ router.get("/login", async (req, res) => {
   }
 });
 
-router.get("/logout", async (req, res) => {
-  res.status(200).json({ message: "Logout successfully" });
+router.post("/forgot-password", async (req, res) => {
+  const { email } = req.body;
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    const OTP = generateOTP();
+    console.log(OTP);
+    // await sendOTP(OTP, email);
+    user.otp = OTP;
+    await user.save();
+    res.status(200).json({ message: "OTP sent successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.post("/reset-password", async (req, res) => {
+  const { email, password, otp } = req.body;
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    if (user.otp !== otp) {
+      return res.status(401).json({ error: "Invalid OTP" });
+    }
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    user.password = hashedPassword;
+    user.otp = null;
+    await user.save();
+    res.status(200).json({ message: "Password reset successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.post("/logout", (req, res) => {
+  res.status(200).json({ message: "User Logout successfully" });
 });
 
 router.get("/profile", authenticateToken, async (req, res) => {
